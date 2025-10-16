@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config(); // .env ফাইল load করবে
+
 import { serve } from "inngest/express";
 import { inngest, functions } from "../inngest/index.js";
 import connectDB from "../configs/db.js";
