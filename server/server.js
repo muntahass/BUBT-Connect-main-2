@@ -4,6 +4,8 @@ import "dotenv/config";
 import connectDB from "./configs/db.js";
 import { inngest, functions } from "./inngest/index.js";
 import { serve } from "inngest/express";
+//import inngestExpress from "@inngest/express";
+
 const app = express();
 
 connectDB();
@@ -13,6 +15,7 @@ app.use(cors());
 
 app.get("/", (req, res) => res.send("Server is running"));
 app.use("/api/inngest", serve({ client: inngest, functions }));
+//app.use("/api/inngest", inngestExpress({ client: inngest, functions }));
 
 app.get("/api/test", async (req, res) => {
   try {
@@ -32,3 +35,4 @@ const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+export default app;
