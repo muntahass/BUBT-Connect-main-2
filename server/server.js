@@ -8,26 +8,32 @@ import { serve } from "inngest/express";
 import { clerkMiddleware } from "@clerk/express";
 import userRouter from "./routes/userRotes.js";
 
-//import inngestExpress from "@inngest/express";
-
 const app = express();
 
+// Connect MongoDB
 connectDB();
 
+// Middlewares
 app.use(express.json());
 app.use(cors());
-
 app.use(clerkMiddleware());
 
+// Routes
 app.get("/", (req, res) => res.send("Server is running"));
+
+// Inngest webhook endpoint
 app.use("/api/inngest", serve({ client: inngest, functions }));
+
+// User-related APIs
 app.use("/api/user", userRouter);
 
+// Test MongoDB connection
 app.get("/api/test", async (req, res) => {
   try {
-    const collections = await import("mongoose").then((m) =>
-      m.default.connection.db.listCollections().toArray()
-    );
+    const mongoose = await import("mongoose").then((m) => m.default);
+    const collections = await mongoose.connection.db
+      .listCollections()
+      .toArray();
     res.json({ message: "MongoDB connected!", collections });
   } catch (error) {
     res
@@ -36,9 +42,10 @@ app.get("/api/test", async (req, res) => {
   }
 });
 
+// Start server
 const PORT = process.env.PORT || 4000;
-
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
 export default app;
