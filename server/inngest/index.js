@@ -72,18 +72,18 @@ const syncUserDeletion = inngest.createFunction(
 );
 
 //Inngest Funstion to send Remainder when a new connection request is added
-const sendNewConnectionRequestReminder = inngest.createFunction(
-  { id: "send-new-connection-request-reminder" },
-  { event: "app/connection-request" },
-  async ({ event, step }) => {
+const sendNewConnectionRequestReminder = inngest.createFunction({
+  id: "send-new-connection-request-reminder",
+  name: "Send Connection Request Reminder",
+  event: "app/connection-request",
+  run: async ({ event, step }) => {
     const { connectionId } = event.data;
 
-    // Send initial connection request email
+    // Send initial email
     await step.run("send-connection-request-mail", async () => {
       const connection = await Connection.findById(connectionId).populate(
         "from_user_id to_user_id"
       );
-
       if (!connection) throw new Error("Connection not found");
 
       const subject = `New Connection Request`;
@@ -95,29 +95,21 @@ const sendNewConnectionRequestReminder = inngest.createFunction(
           <p>Thanks,<br/>PingUp - Stay Connected</p>
         </div>
       `;
-
-      await sendEmail({
-        to: connection.to_user_id.email,
-        subject,
-        body,
-      });
+      await sendEmail({ to: connection.to_user_id.email, subject, body });
     });
 
     // Wait 24 hours
     const in24Hours = new Date(Date.now() + 24 * 60 * 60 * 1000);
     await step.sleepUntil("wait-for-24-hours", in24Hours);
 
-    // Send reminder email if request not accepted
+    // Send reminder if not accepted
     await step.run("send-connection-request-reminder", async () => {
       const connection = await Connection.findById(connectionId).populate(
         "from_user_id to_user_id"
       );
-
       if (!connection) throw new Error("Connection not found");
-
-      if (connection.status === "accepted") {
+      if (connection.status === "accepted")
         return { message: "Already accepted" };
-      }
 
       const subject = `New Connection Request`;
       const body = `
@@ -128,17 +120,11 @@ const sendNewConnectionRequestReminder = inngest.createFunction(
           <p>Thanks,<br/>PingUp - Stay Connected</p>
         </div>
       `;
-
-      await sendEmail({
-        to: connection.to_user_id.email,
-        subject,
-        body,
-      });
-
+      await sendEmail({ to: connection.to_user_id.email, subject, body });
       return { message: "Reminder sent." };
     });
-  }
-);
+  },
+});
 
 // Export all Inngest functions
 export const functions = [
