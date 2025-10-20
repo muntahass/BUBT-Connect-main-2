@@ -1,39 +1,48 @@
-import React from 'react'
-import { Route, Routes } from 'react-router-dom'
-import Login from './pages/Login'
-import Feed from './pages/Feed'
-import Messages from './pages/Messages'
-import ChatBox from './pages/ChatBox'
-import Connections from './pages/Connections'
-import Discover from './pages/Discover'
-import Profile from './pages/Profile'
-import CreatePost from './pages/CreatePost'
-import {useUser} from '@clerk/clerk-react'
-import Layout from './pages/Layout'
-import Announcements from './pages/Announcements'
-import {Toaster} from 'react-hot-toast'
+import React from "react";
+import { Route, Routes } from "react-router-dom";
+import Login from "./pages/Login";
+import Feed from "./pages/Feed";
+import Messages from "./pages/Messages";
+import ChatBox from "./pages/ChatBox";
+import Connections from "./pages/Connections";
+import Discover from "./pages/Discover";
+import Profile from "./pages/Profile";
+import CreatePost from "./pages/CreatePost";
+import { useUser, useAuth } from "@clerk/clerk-react";
+import Layout from "./pages/Layout";
+import Announcements from "./pages/Announcements";
+import { Toaster } from "react-hot-toast";
+import { useEffect } from "react";
 
 const App = () => {
-  const {user} = useUser()
+  const { user } = useUser();
+  const { getToken } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      // This will run whenever 'user' changes and is not null/undefined
+      getToken().then((token) => console.log(token));
+      // You can also store the token in state or use it for API calls
+    }
+  }, [user]);
   return (
     <>
-    <Toaster />
-    <Routes>
-    
-      <Route path='/' element={ !user ? <Login /> : <Layout/>}>
-        <Route index element={<Feed />} />
-        <Route path='messages' element={<Messages />} />
-        <Route path='messages/:userId' element={<ChatBox />} />
-        <Route path='connections' element={<Connections />} />
-        <Route path='announcements' element={<Announcements />} />
-        <Route path='discover' element={<Discover />} />
-        <Route path='profile' element={<Profile />} />
-        <Route path='profile/:profileId' element={<Profile />} />
-        <Route path='create-post' element={<CreatePost />} />
-      </Route>
-    </Routes>
+      <Toaster />
+      <Routes>
+        <Route path="/" element={!user ? <Login /> : <Layout />}>
+          <Route index element={<Feed />} />
+          <Route path="messages" element={<Messages />} />
+          <Route path="messages/:userId" element={<ChatBox />} />
+          <Route path="connections" element={<Connections />} />
+          <Route path="announcements" element={<Announcements />} />
+          <Route path="discover" element={<Discover />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="profile/:profileId" element={<Profile />} />
+          <Route path="create-post" element={<CreatePost />} />
+        </Route>
+      </Routes>
     </>
-  )
-}
+  );
+};
 
-export default App
+export default App;
